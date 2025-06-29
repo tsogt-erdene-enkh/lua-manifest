@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8" />
     <title>Steam Manifest Downloader</title>
@@ -16,19 +17,18 @@
             overflow: hidden;
             cursor: none;
         }
-        input, button, a {
-            cursor: none;
+
+        *, *:hover, *:active, *:focus {
+            cursor: none !important;
         }
-        button:hover, 
-        .discord-btn:hover {
-            cursor: none;
-        }
+
         #particles-js {
             position: fixed;
             width: 100%;
             height: 100%;
             z-index: -1;
         }
+
         .container {
             display: flex;
             flex-direction: column;
@@ -38,6 +38,7 @@
             text-align: center;
             padding: 20px;
         }
+
         h1 {
             font-size: 2.5rem;
             margin-bottom: 20px;
@@ -46,10 +47,17 @@
             -webkit-text-fill-color: transparent;
             animation: shine 5s infinite linear;
         }
+
         @keyframes shine {
-            0% { background-position: 0% }
-            100% { background-position: 200% }
+            0% {
+                background-position: 0%
+            }
+
+            100% {
+                background-position: 200%
+            }
         }
+
         input {
             padding: 15px;
             width: 80%;
@@ -62,11 +70,14 @@
             font-size: 16px;
             transition: box-shadow 0.3s ease;
         }
+
         input:focus {
             outline: none;
             box-shadow: 0 0 8px #00ffe1;
         }
-        button, .discord-btn {
+
+        button,
+        .discord-btn {
             padding: 15px 30px;
             border: none;
             border-radius: 12px;
@@ -78,14 +89,18 @@
             transition: transform 0.2s ease, box-shadow 0.2s ease;
             margin: 10px;
         }
-        button:hover, .discord-btn:hover {
+
+        button:hover,
+        .discord-btn:hover {
             transform: scale(1.05);
             box-shadow: 0 0 15px #00ffe1;
         }
+
         .discord-btn {
             text-decoration: none;
             display: inline-block;
         }
+
         #result {
             margin-top: 30px;
             font-size: 18px;
@@ -93,6 +108,7 @@
             max-width: 90%;
             word-wrap: break-word;
         }
+
         a.download-link {
             display: inline-block;
             margin-top: 20px;
@@ -100,10 +116,11 @@
             background: linear-gradient(90deg, #00ffe1, #0077ff);
             color: #0e0e0e;
             text-decoration: none;
-            border-radius: 8px;
+            border-radius: 12px;
             font-weight: bold;
             transition: transform 0.2s ease, box-shadow 0.2s ease;
         }
+
         a.download-link:hover {
             transform: scale(1.05);
             box-shadow: 0 0 15px #00ffe1;
@@ -132,18 +149,23 @@
             h1 {
                 font-size: 2rem;
             }
+
             input {
                 width: 100%;
                 max-width: none;
             }
-            button, .discord-btn {
+
+            button,
+            .discord-btn {
                 width: 90%;
                 padding: 14px 0;
                 font-size: 18px;
             }
+
             #result {
                 font-size: 16px;
             }
+
             a.download-link {
                 width: 90%;
                 padding: 14px 0;
@@ -152,6 +174,7 @@
         }
     </style>
 </head>
+
 <body>
 
     <div id="particles-js"></div>
@@ -170,7 +193,7 @@
         async function generateManifest() {
             let input = document.getElementById('appid').value.trim();
             if (!input) return;
-            
+
             const steamAppUrlPattern = /https?:\/\/store\.steampowered\.com\/app\/(\d+)/i;
             const match = input.match(steamAppUrlPattern);
             let appid = input;
@@ -297,4 +320,5 @@
         });
     </script>
 </body>
+
 </html>
