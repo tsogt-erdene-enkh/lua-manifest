@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <title>Steam Manifest Downloader</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.7.1/jszip.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/particles.js@2.0.0/particles.min.js"></script>
+    <style>
+        body {
+            background-color: #0e0e0e;
+            color: #f1f1f1;
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            cursor: none;
+        }
+        input, button, a {
+            cursor: none;
+        }
+        button:hover, 
+        .discord-btn:hover {
+            cursor: none;
+        }
+        #particles-js {
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+        }
+        .container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            text-align: center;
+            padding: 20px;
+        }
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 20px;
+            background: linear-gradient(90deg, #00ffe1, #0077ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: shine 5s infinite linear;
+        }
+        @keyframes shine {
+            0% { background-position: 0% }
+            100% { background-position: 200% }
+        }
+        input {
+            padding: 15px;
+            width: 80%;
+            max-width: 300px;
+            border: none;
+            border-radius: 12px;
+            margin: 10px 0;
+            background-color: #1e1e1e;
+            color: #f1f1f1;
+            font-size: 16px;
+            transition: box-shadow 0.3s ease;
+        }
+        input:focus {
+            outline: none;
+            box-shadow: 0 0 8px #00ffe1;
+        }
+        button, .discord-btn {
+            padding: 15px 30px;
+            border: none;
+            border-radius: 12px;
+            background: linear-gradient(90deg, #00ffe1, #0077ff);
+            color: #0e0e0e;
+            font-weight: bold;
+            font-size: 16px;
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            margin: 10px;
+        }
+        button:hover, .discord-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 15px #00ffe1;
+        }
+        .discord-btn {
+            text-decoration: none;
+            display: inline-block;
+        }
+        #result {
+            margin-top: 30px;
+            font-size: 18px;
+            text-align: center;
+            max-width: 90%;
+            word-wrap: break-word;
+        }
+        a.download-link {
+            display: inline-block;
+            margin-top: 20px;
+            padding: 10px 20px;
+            background-color: #00ffe1;
+            color: #0e0e0e;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: bold;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        a.download-link:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 15px #00ffe1;
+        }
+
+        #custom-cursor {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 24px;
+            height: 24px;
+            pointer-events: none;
+            border-radius: 50%;
+            background: rgba(0, 255, 225, 0.7);
+            box-shadow:
+                0 0 8px rgba(0, 255, 225, 0.8),
+                0 0 20px rgba(0, 255, 225, 0.6),
+                0 0 30px rgba(0, 255, 225, 0.4);
+            transform: translate(-50%, -50%);
+            transition: width 0.15s ease, height 0.15s ease, background 0.3s ease;
+            z-index: 9999;
+            mix-blend-mode: screen;
+        }
+
+        @media (max-width: 480px) {
+            h1 {
+                font-size: 2rem;
+            }
+            input {
+                width: 100%;
+                max-width: none;
+            }
+            button, .discord-btn {
+                width: 90%;
+                padding: 14px 0;
+                font-size: 18px;
+            }
+            #result {
+                font-size: 16px;
+            }
+            a.download-link {
+                width: 90%;
+                padding: 14px 0;
+                font-size: 18px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="particles-js"></div>
+
+    <div class="container">
+        <h1>🎮 Steam Manifest Downloader</h1>
+        <input type="text" id="appid" placeholder="Enter Steam AppID or URL" required />
+        <button onclick="generateManifest()">Download Manifest</button>
+        <a href="https://discord.gg/29Qc3GZvm6" target="_blank" class="discord-btn">Join our Discord</a>
+        <div id="result"></div>
+    </div>
+
+    <div id="custom-cursor"></div>
+
+    <script>
+        async function generateManifest() {
+            let input = document.getElementById('appid').value.trim();
+            if (!input) return;
+            
+            const steamAppUrlPattern = /https?:\/\/store\.steampowered\.com\/app\/(\d+)/i;
+            const match = input.match(steamAppUrlPattern);
+            let appid = input;
+
+            if (match && match[1]) {
+                appid = match[1];
+            }
+
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = "⏳ Fetching files...";
+
+            const githubApiUrl = `https://api.github.com/repos/SteamAutoCracks/ManifestHub/git/trees/${appid}?recursive=1`;
+
+            try {
+                const startTime = performance.now();
+
+                const treeResponse = await fetch(githubApiUrl);
+                if (!treeResponse.ok) throw new Error(`❌ Could not fetch branch. Status ${treeResponse.status}`);
+
+                const treeData = await treeResponse.json();
+                const files = treeData.tree.filter(file => file.type === 'blob');
+
+                if (files.length === 0) throw new Error(`❌ No files found in branch '${appid}'`);
+
+                const zip = new JSZip();
+                let totalSize = 0;
+
+                for (const file of files) {
+                    const fileUrl = `https://raw.githubusercontent.com/SteamAutoCracks/ManifestHub/${appid}/${file.path}`;
+                    const fileResponse = await fetch(fileUrl);
+                    if (!fileResponse.ok) throw new Error(`❌ Failed to download ${file.path}`);
+
+                    const contentBlob = await fileResponse.blob();
+                    const arrayBuffer = await contentBlob.arrayBuffer();
+                    zip.file(file.path, arrayBuffer);
+                    totalSize += contentBlob.size;
+                }
+
+                const finalZipBlob = await zip.generateAsync({ type: "blob" });
+                const downloadUrl = URL.createObjectURL(finalZipBlob);
+                const elapsedTime = ((performance.now() - startTime) / 1000).toFixed(2);
+
+                resultDiv.innerHTML = `
+                    <h2>✅ Manifest Ready</h2>
+                    <p><strong>AppID:</strong> ${appid}</p>
+                    <p><strong>Files:</strong> ${files.length}</p>
+                    <p><strong>Size:</strong> ${(totalSize / 1024 / 1024).toFixed(2)} MB</p>
+                    <p><strong>Time Taken:</strong> ${elapsedTime} sec</p>
+                    <a href="${downloadUrl}" download="${appid}.zip" class="download-link">📥 Download ZIP</a>
+                `;
+            } catch (err) {
+                resultDiv.innerHTML = `<p style="color:red;">${err.message}</p>`;
+            }
+        }
+
+        particlesJS("particles-js", {
+            "particles": {
+                "number": { "value": 60, "density": { "enable": true, "value_area": 800 } },
+                "color": { "value": "#00ffe1" },
+                "shape": { "type": "circle" },
+                "opacity": { "value": 0.5, "random": true },
+                "size": { "value": 3, "random": true },
+                "line_linked": {
+                    "enable": true,
+                    "distance": 120,
+                    "color": "#00ffe1",
+                    "opacity": 0.4,
+                    "width": 1
+                },
+                "move": {
+                    "enable": true,
+                    "speed": 2,
+                    "direction": "none",
+                    "random": true,
+                    "straight": false,
+                    "out_mode": "out",
+                    "attract": { "enable": false }
+                }
+            },
+            "interactivity": {
+                "detect_on": "canvas",
+                "events": {
+                    "onhover": { "enable": true, "mode": "grab" },
+                    "onclick": { "enable": true, "mode": "push" },
+                    "resize": true
+                },
+                "modes": {
+                    "grab": { "distance": 140, "line_linked": { "opacity": 0.7 } },
+                    "push": { "particles_nb": 4 }
+                }
+            },
+            "retina_detect": true
+        });
+
+        const cursor = document.getElementById('custom-cursor');
+
+        let mouseX = 0, mouseY = 0;
+        let posX = 0, posY = 0;
+
+        const speed = 0.15;
+
+        document.addEventListener('mousemove', e => {
+            mouseX = e.clientX;
+            mouseY = e.clientY;
+        });
+
+        function animate() {
+            posX += (mouseX - posX) * speed;
+            posY += (mouseY - posY) * speed;
+            cursor.style.transform = `translate(${posX}px, ${posY}px) translate(-50%, -50%)`;
+            requestAnimationFrame(animate);
+        }
+        animate();
+
+        document.addEventListener('mousedown', () => {
+            cursor.style.width = '36px';
+            cursor.style.height = '36px';
+            cursor.style.background = 'rgba(0, 255, 225, 1)';
+            setTimeout(() => {
+                cursor.style.width = '24px';
+                cursor.style.height = '24px';
+                cursor.style.background = 'rgba(0, 255, 225, 0.7)';
+            }, 150);
+        });
+    </script>
+</body>
+</html>
