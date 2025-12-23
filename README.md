@@ -1,12 +1,13 @@
-# Welcome to my _Lua Manifestor!_
+# Welcome to this Lua Manifest Generator
 
-## How to use this manifestor?
+## How to use this manifest generator?
 
-How to use this? Head over to https://example.com
-After heading to the website, enter the steam ID of your game and your manifest should be ready. 
-Click download manifest and there you go!
+1. Head to https://beanex.vercel.app/ 
+2. Enter your game's steam ID into the input box.
+3. Click Download URL
+4. Wait and then there you go!
 
 ## Any prerequisites?
 
-- Just a modern browser
-- And access to internet.
+- A modern browser
+- and access to internet.
